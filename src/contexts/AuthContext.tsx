@@ -10,16 +10,14 @@ import {
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
-type AuthContextType = {
+const AuthContext = createContext<{
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextType | null>(null);
+} | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

@@ -31,7 +31,7 @@ const PetCard = ({
   reportDate = "2024-03-20",
   status = "lost",
   onContactClick = () => console.log("Contact clicked"),
-  onDetailsClick = () => console.log("Details clicked"),
+  onDetailsClick = () => (window.location.href = `/pet/${name}`), // Using name as ID for now
 }: PetCardProps) => {
   const statusColors = {
     lost: "bg-red-100 text-red-800",
