@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /pet-images/{imageId} {
+      // Allow read and write access to pet images
+      // In production, you should restrict write to authenticated users
+      allow read, write: if true;
+    }
+    
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
