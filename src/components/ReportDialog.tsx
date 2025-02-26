@@ -1,18 +1,13 @@
 import React from "react";
 import { Camera, Upload, X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { cn } from "../lib/utils";
+import { uploadPetImage } from "@/lib/storage";
 
 interface ReportDialogProps {
   open?: boolean;
@@ -47,6 +42,7 @@ const ReportDialog = ({
     contactInfo: "",
     photos: [],
   });
+  const [isUploading, setIsUploading] = React.useState(false);
 
   const handleNext = () => {
     if (step < 3) setStep(step + 1);
@@ -61,13 +57,35 @@ const ReportDialog = ({
     if (step > 1) setStep(step - 1);
   };
 
-  const handlePhotoUpload = () => {
-    // Simulated photo upload
-    const newPhoto = `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`;
-    setFormData((prev) => ({
-      ...prev,
-      photos: [...prev.photos, newPhoto],
-    }));
+  const handlePhotoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const downloadURL = await uploadPetImage(file);
+      setFormData((prev) => ({
+        ...prev,
+        photos: [...prev.photos, downloadURL],
+      }));
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      // TODO: Add proper error handling/notification
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCameraCapture = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // TODO: Implement camera capture UI
+      console.log("Camera stream:", stream);
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+    }
   };
 
   return (
@@ -133,17 +151,25 @@ const ReportDialog = ({
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
-                    onClick={handlePhotoUpload}
+                    className="w-full relative"
+                    disabled={isUploading}
                   >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={handlePhotoUpload}
+                      disabled={isUploading}
+                    />
                     <Upload className="mr-2 h-4 w-4" />
-                    Upload Photo
+                    {isUploading ? "Uploading..." : "Upload Photo"}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={handlePhotoUpload}
+                    onClick={handleCameraCapture}
+                    disabled={isUploading}
                   >
                     <Camera className="mr-2 h-4 w-4" />
                     Take Photo
@@ -254,10 +280,11 @@ const ReportDialog = ({
               variant="outline"
               onClick={handleBack}
               className={cn(step === 1 && "invisible")}
+              disabled={isUploading}
             >
               Back
             </Button>
-            <Button type="button" onClick={handleNext}>
+            <Button type="button" onClick={handleNext} disabled={isUploading}>
               {step === 3 ? "Submit" : "Next"}
             </Button>
           </div>
