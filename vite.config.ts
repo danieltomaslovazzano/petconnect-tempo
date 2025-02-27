@@ -5,12 +5,10 @@ import { tempo } from "tempo-devtools/dist/vite";
 
 const conditionalPlugins: [string, Record<string, any>][] = [];
 
-// @ts-ignore
 if (process.env.TEMPO === "true") {
   conditionalPlugins.push(["tempo-devtools/swc", {}]);
 }
 
-// https://vitejs.dev/config/
 export default defineConfig({
   base: process.env.NODE_ENV === "development" ? "/" : process.env.VITE_BASE_PATH || "/",
   optimizeDeps: {
@@ -29,7 +27,6 @@ export default defineConfig({
     },
   },
   server: {
-    // @ts-ignore
     allowedHosts: true,
-  }
+  },
 });

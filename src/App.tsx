@@ -1,19 +1,28 @@
-import { Suspense } from "react";
-import { useRoutes, Routes, Route } from "react-router-dom";
-import Home from "./components/home";
-import PetDetails from "./components/PetDetails";
-import routes from "tempo-routes";
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { FirebaseProvider } from './contexts/FirebaseContext';
+import LoadingSpinner from './components/LoadingSpinner';
+import Navbar from './components/Navbar';
 
-function App() {
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+const App: React.FC = () => {
   return (
-    <Suspense fallback={<p>Loading...</p>}>
-      {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/pet/:id" element={<PetDetails />} />
-      </Routes>
-    </Suspense>
+    <FirebaseProvider>
+      <Router>
+        <Navbar />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </Router>
+    </FirebaseProvider>
   );
-}
+};
 
 export default App;
